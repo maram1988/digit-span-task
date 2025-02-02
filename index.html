@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Span Task</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #digitDisplay {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .digitButton {
+            font-size: 40px;
+            width: 70px;
+            height: 70px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: yellow;
+            border: 2px solid #ccc;
+        }
+        #clearButton, #startButton, #downloadButton {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+        #resultsContainer {
+            margin-top: 30px;
+            font-size: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Digit Span Task</h2>
+
+<div id="userInfo">
+    <p>Please enter your name and student ID:</p>
+    <input type="text" id="nameInput" placeholder="Enter your name" /><br><br>
+    <input type="text" id="studentIdInput" placeholder="Enter your student ID" /><br><br>
+    <button id="startButton">Start Test</button>
+</div>
+
+<div id="digitDisplay" style="display:none;"></div>
+<div id="digitsContainer" style="display:none;"></div>
+<button id="clearButton" onclick="clearSelection()" style="display:none;">Clear Selection</button>
+<div id="feedback"></div>
+<button id="downloadButton" style="display:none;" onclick="downloadExcel()">Download Results</button>
+
+<div id="resultsContainer"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const startButton = document.getElementById("startButton");
+        if (startButton) {
+            startButton.addEventListener("click", startTest);
+        }
+    });
+
+    function startTest() {
+        name = document.getElementById('nameInput').value.trim();
+        studentId = document.getElementById('studentIdInput').value.trim();
+        
+        if (!name || !studentId) {
+            alert("Please enter both your name and student ID.");
+            return;
+        }
+
+        document.getElementById('userInfo').style.display = 'none';
+        document.getElementById('digitDisplay').style.display = 'block';
+        document.getElementById('digitsContainer').style.display = 'block';
+        document.getElementById('clearButton').style.display = 'block';
+        showSequence();
+    }
+</script>
+
+</body>
+</html>
