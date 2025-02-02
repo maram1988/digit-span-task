@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digit Span Task</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,6 +34,11 @@
             margin-top: 20px;
             font-size: 24px;
         }
+        #resultsContainer {
+            margin-top: 30px;
+            font-size: 20px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -51,7 +58,24 @@
 <div id="feedback"></div>
 <button id="downloadButton" style="display:none;" onclick="downloadExcel()">Download Results</button>
 
+<div id="resultsContainer"></div>
+
 <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+    
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    
     let maxDigits = 7;
     let currentDigits = 2;
     let sequence = [];
@@ -60,8 +84,7 @@
     let totalErrors = 0;
     let name = '';
     let studentId = '';
-    let resultData = JSON.parse(localStorage.getItem("resultData")) || [];
-
+    
     function startTest() {
         name = document.getElementById('nameInput').value;
         studentId = document.getElementById('studentIdInput').value;
@@ -111,58 +134,20 @@
         }
     }
 
-    function handleDigitClick(digit) {
-        userInput.push(digit);
-        if (userInput.length === currentDigits) {
-            checkAnswer();
-        }
-    }
-
-    function clearSelection() {
-        userInput = [];
-    }
-
-    function checkAnswer() {
-        let feedback = document.getElementById('feedback');
-        if (userInput.join('') === sequence.join('')) {
-            correctCount++;
-            feedback.textContent = "Correct!";
-            totalErrors = 0;
-            if (correctCount >= 2 && currentDigits < maxDigits) {
-                currentDigits++;
-                correctCount = 0;
+    function fetchResults() {
+        const resultsRef = firebase.database().ref("results");
+        resultsRef.once("value", (snapshot) => {
+            let data = snapshot.val();
+            let output = "<h3>Saved Results</h3><ul>";
+            for (let key in data) {
+                output += `<li>${data[key].name} - ${data[key].studentId} - Score: ${data[key].score}</li>`;
             }
-        } else {
-            totalErrors++;
-            feedback.textContent = `Incorrect! Correct sequence: ${sequence.join('')}`;
-            if (totalErrors >= 2) {
-                feedback.textContent = `Game Over! Score: ${currentDigits - 1}`;
-                saveResult();
-                return;
-            }
-        }
-        setTimeout(() => {
-            if (currentDigits > maxDigits) {
-                feedback.textContent = `Task Complete! Score: ${currentDigits - 1}`;
-                saveResult();
-            } else {
-                showSequence();
-            }
-        }, 2000);
+            output += "</ul>";
+            document.getElementById("resultsContainer").innerHTML = output;
+        });
     }
-
-    function saveResult() {
-        resultData.push({ name, studentId, score: currentDigits - 1 });
-        localStorage.setItem("resultData", JSON.stringify(resultData));
-        document.getElementById('downloadButton').style.display = 'block';
-    }
-
-    function downloadExcel() {
-        let ws = XLSX.utils.json_to_sheet(resultData);
-        let wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Results");
-        XLSX.writeFile(wb, "digit-span-task/digit_span_results.xlsx");
-    }
+    
+    window.onload = fetchResults;
 </script>
 
 </body>
