@@ -1,65 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digit Span Task</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        #digitDisplay {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-        .digitButton {
-            font-size: 40px;
-            width: 70px;
-            height: 70px;
-            margin: 5px;
-            cursor: pointer;
-            background-color: yellow;
-            border: 2px solid #ccc;
-        }
-        #clearButton, #startButton, #downloadButton {
-            margin-top: 20px;
-            font-size: 20px;
-        }
-        #feedback {
-            margin-top: 20px;
-            font-size: 24px;
-        }
-        #resultsContainer {
-            margin-top: 30px;
-            font-size: 20px;
-            text-align: left;
-        }
-    </style>
-</head>
-<body>
-
-<h2>Digit Span Task</h2>
-
-<div id="userInfo">
-    <p>Please enter your name and student ID:</p>
-    <input type="text" id="nameInput" placeholder="Enter your name" /><br><br>
-    <input type="text" id="studentIdInput" placeholder="Enter your student ID" /><br><br>
-    <button id="startButton" onclick="startTest()">Start Test</button>
-</div>
-
-<div id="digitDisplay"></div>
-<div id="digitsContainer"></div>
-<button id="clearButton" onclick="clearSelection()">Clear Selection</button>
-<div id="feedback"></div>
-<button id="downloadButton" style="display:none;" onclick="downloadExcel()">Download Results</button>
-
-<div id="resultsContainer"></div>
-
 <script>
     // Firebase Configuration
     const firebaseConfig = {
@@ -71,11 +9,11 @@
         messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
         appId: "YOUR_APP_ID"
     };
-    
+
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-    
+
     let maxDigits = 7;
     let currentDigits = 2;
     let sequence = [];
@@ -84,7 +22,7 @@
     let totalErrors = 0;
     let name = '';
     let studentId = '';
-    
+
     function startTest() {
         name = document.getElementById('nameInput').value;
         studentId = document.getElementById('studentIdInput').value;
@@ -134,8 +72,51 @@
         }
     }
 
+    function handleDigitClick(digit) {
+        userInput.push(digit);
+        if (userInput.length === currentDigits) {
+            checkAnswer();
+        }
+    }
+
+    function checkAnswer() {
+        let feedback = document.getElementById('feedback');
+        if (userInput.join('') === sequence.join('')) {
+            correctCount++;
+            feedback.textContent = "Correct!";
+            totalErrors = 0;
+            if (correctCount >= 2 && currentDigits < maxDigits) {
+                currentDigits++;
+                correctCount = 0;
+            }
+        } else {
+            totalErrors++;
+            feedback.textContent = `Incorrect! Correct sequence: ${sequence.join('')}`;
+            if (totalErrors >= 2) {
+                feedback.textContent = `Game Over! Score: ${currentDigits - 1}`;
+                saveResult();
+                return;
+            }
+        }
+        setTimeout(() => {
+            if (currentDigits > maxDigits) {
+                feedback.textContent = `Task Complete! Score: ${currentDigits - 1}`;
+                saveResult();
+            } else {
+                showSequence();
+            }
+        }, 2000);
+    }
+
+    function saveResult() {
+        const result = { name, studentId, score: currentDigits - 1 };
+        database.ref("results").push(result);
+        fetchResults(); // تحديث النتائج المعروضة بعد الحفظ
+        document.getElementById('downloadButton').style.display = 'block';
+    }
+
     function fetchResults() {
-        const resultsRef = firebase.database().ref("results");
+        const resultsRef = database.ref("results");
         resultsRef.once("value", (snapshot) => {
             let data = snapshot.val();
             let output = "<h3>Saved Results</h3><ul>";
@@ -146,9 +127,26 @@
             document.getElementById("resultsContainer").innerHTML = output;
         });
     }
-    
-    window.onload = fetchResults;
-</script>
 
-</body>
-</html>
+    window.onload = fetchResults;
+
+    function downloadExcel() {
+        const resultsRef = database.ref("results");
+        resultsRef.once("value", (snapshot) => {
+            let data = snapshot.val();
+            let resultArray = [];
+            for (let key in data) {
+                resultArray.push({
+                    Name: data[key].name,
+                    Student_ID: data[key].studentId,
+                    Score: data[key].score
+                });
+            }
+
+            let ws = XLSX.utils.json_to_sheet(resultArray);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Results");
+            XLSX.writeFile(wb, "Digit_Span_Results.xlsx");
+        });
+    }
+</script>
