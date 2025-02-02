@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Span Task</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #digitDisplay {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .digitButton {
+            font-size: 40px;
+            width: 70px;
+            height: 70px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: yellow;
+            border: 2px solid #ccc;
+        }
+        #clearButton, #startButton, #downloadButton {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        #feedback {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Digit Span Task</h2>
+
+<div id="userInfo">
+    <p>Please enter your name and student ID:</p>
+    <input type="text" id="nameInput" placeholder="Enter your name" /><br><br>
+    <input type="text" id="studentIdInput" placeholder="Enter your student ID" /><br><br>
+    <button id="startButton" onclick="startTest()">Start Test</button>
+</div>
+
+<div id="digitDisplay"></div>
+<div id="digitsContainer"></div>
+<button id="clearButton" onclick="clearSelection()">Clear Selection</button>
+<div id="feedback"></div>
+<button id="downloadButton" style="display:none;" onclick="downloadExcel()">Download Results</button>
+
+<script>
+    let maxDigits = 7;
+    let currentDigits = 2;
+    let sequence = [];
+    let userInput = [];
+    let correctCount = 0;
+    let totalErrors = 0;
+    let name = '';
+    let studentId = '';
+    let resultData = JSON.parse(localStorage.getItem("resultData")) || [];
+
+    function startTest() {
+        name = document.getElementById('nameInput').value;
+        studentId = document.getElementById('studentIdInput').value;
+        if (!name || !studentId) {
+            alert("Please enter both your name and student ID.");
+            return;
+        }
+        document.getElementById('userInfo').style.display = 'none';
+        showSequence();
+    }
+
+    function generateSequence(length) {
+        return Array.from({length}, () => Math.floor(Math.random() * 10));
+    }
+
+    function showSequence() {
+        document.getElementById('feedback').textContent = '';
+        userInput = [];
+        sequence = generateSequence(currentDigits);
+        let digitDisplay = document.getElementById('digitDisplay');
+        let index = 0;
+
+        function displayNextDigit() {
+            if (index < sequence.length) {
+                digitDisplay.textContent = sequence[index];
+                index++;
+                setTimeout(displayNextDigit, 1000);
+            } else {
+                setTimeout(() => {
+                    digitDisplay.textContent = '';
+                    showDigitsForSelection();
+                }, 1000);
+            }
+        }
+        displayNextDigit();
+    }
+
+    function showDigitsForSelection() {
+        let container = document.getElementById('digitsContainer');
+        container.innerHTML = '';
+        for (let i = 0; i < 10; i++) {
+            let digitButton = document.createElement('button');
+            digitButton.textContent = i;
+            digitButton.className = 'digitButton';
+            digitButton.onclick = () => handleDigitClick(i);
+            container.appendChild(digitButton);
+        }
+    }
+
+    function handleDigitClick(digit) {
+        userInput.push(digit);
+        if (userInput.length === currentDigits) {
+            checkAnswer();
+        }
+    }
+
+    function clearSelection() {
+        userInput = [];
+    }
+
+    function checkAnswer() {
+        let feedback = document.getElementById('feedback');
+        if (userInput.join('') === sequence.join('')) {
+            correctCount++;
+            feedback.textContent = "Correct!";
+            totalErrors = 0;
+            if (correctCount >= 2 && currentDigits < maxDigits) {
+                currentDigits++;
+                correctCount = 0;
+            }
+        } else {
+            totalErrors++;
+            feedback.textContent = `Incorrect! Correct sequence: ${sequence.join('')}`;
+            if (totalErrors >= 2) {
+                feedback.textContent = `Game Over! Score: ${currentDigits - 1}`;
+                saveResult();
+                return;
+            }
+        }
+        setTimeout(() => {
+            if (currentDigits > maxDigits) {
+                feedback.textContent = `Task Complete! Score: ${currentDigits - 1}`;
+                saveResult();
+            } else {
+                showSequence();
+            }
+        }, 2000);
+    }
+
+    function saveResult() {
+        resultData.push({ name, studentId, score: currentDigits - 1 });
+        localStorage.setItem("resultData", JSON.stringify(resultData));
+        document.getElementById('downloadButton').style.display = 'block';
+    }
+
+    function downloadExcel() {
+        let ws = XLSX.utils.json_to_sheet(resultData);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Results");
+        XLSX.writeFile(wb, "digit_span_results.xlsx");
+    }
+</script>
+
+</body>
+</html>
