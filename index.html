@@ -161,7 +161,7 @@
         let ws = XLSX.utils.json_to_sheet(resultData);
         let wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Results");
-        XLSX.writeFile(wb, "digit_span_results.xlsx");
+        XLSX.writeFile(wb, "digit-span-task/digit_span_results.xlsx");
     }
 </script>
 
