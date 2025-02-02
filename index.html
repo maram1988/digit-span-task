@@ -49,7 +49,7 @@
     <p>Please enter your name and student ID:</p>
     <input type="text" id="nameInput" placeholder="Enter your name" /><br><br>
     <input type="text" id="studentIdInput" placeholder="Enter your student ID" /><br><br>
-    <button id="startButton" onclick="startTest()">Start Test</button>
+    <button id="startButton">Start Test</button>
 </div>
 
 <div id="digitDisplay"></div>
@@ -61,7 +61,7 @@
 <div id="resultsContainer"></div>
 
 <script>
-    // Firebase Configuration - استبدل بالقيم الحقيقية من Firebase
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_AUTH_DOMAIN",
@@ -71,11 +71,11 @@
         messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
         appId: "YOUR_APP_ID"
     };
-
+    
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
-
+    
     let maxDigits = 7;
     let currentDigits = 2;
     let sequence = [];
@@ -84,6 +84,8 @@
     let totalErrors = 0;
     let name = '';
     let studentId = '';
+    
+    document.getElementById("startButton").addEventListener("click", startTest);
 
     function startTest() {
         name = document.getElementById('nameInput').value;
@@ -134,51 +136,8 @@
         }
     }
 
-    function handleDigitClick(digit) {
-        userInput.push(digit);
-        if (userInput.length === currentDigits) {
-            checkAnswer();
-        }
-    }
-
-    function checkAnswer() {
-        let feedback = document.getElementById('feedback');
-        if (userInput.join('') === sequence.join('')) {
-            correctCount++;
-            feedback.textContent = "Correct!";
-            totalErrors = 0;
-            if (correctCount >= 2 && currentDigits < maxDigits) {
-                currentDigits++;
-                correctCount = 0;
-            }
-        } else {
-            totalErrors++;
-            feedback.textContent = `Incorrect! Correct sequence: ${sequence.join('')}`;
-            if (totalErrors >= 2) {
-                feedback.textContent = `Game Over! Score: ${currentDigits - 1}`;
-                saveResult();
-                return;
-            }
-        }
-        setTimeout(() => {
-            if (currentDigits > maxDigits) {
-                feedback.textContent = `Task Complete! Score: ${currentDigits - 1}`;
-                saveResult();
-            } else {
-                showSequence();
-            }
-        }, 2000);
-    }
-
-    function saveResult() {
-        const result = { name, studentId, score: currentDigits - 1 };
-        database.ref("results").push(result);
-        fetchResults();
-        document.getElementById('downloadButton').style.display = 'block';
-    }
-
     function fetchResults() {
-        const resultsRef = database.ref("results");
+        const resultsRef = firebase.database().ref("results");
         resultsRef.once("value", (snapshot) => {
             let data = snapshot.val();
             let output = "<h3>Saved Results</h3><ul>";
@@ -189,28 +148,8 @@
             document.getElementById("resultsContainer").innerHTML = output;
         });
     }
-
+    
     window.onload = fetchResults;
-
-    function downloadExcel() {
-        const resultsRef = database.ref("results");
-        resultsRef.once("value", (snapshot) => {
-            let data = snapshot.val();
-            let resultArray = [];
-            for (let key in data) {
-                resultArray.push({
-                    Name: data[key].name,
-                    Student_ID: data[key].studentId,
-                    Score: data[key].score
-                });
-            }
-
-            let ws = XLSX.utils.json_to_sheet(resultArray);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Results");
-            XLSX.writeFile(wb, "Digit_Span_Results.xlsx");
-        });
-    }
 </script>
 
 </body>
