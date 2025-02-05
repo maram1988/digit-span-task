@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digit Span Task</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -32,6 +34,11 @@
             margin-top: 20px;
             font-size: 24px;
         }
+        #resultsContainer {
+            margin-top: 30px;
+            font-size: 20px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
@@ -51,7 +58,24 @@
 <div id="feedback"></div>
 <button id="downloadButton" style="display:none;" onclick="downloadExcel()">Download Results</button>
 
+<div id="resultsContainer"></div>
+
 <script>
+    // Firebase Configuration - استبدل بالقيم الحقيقية من Firebase
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_AUTH_DOMAIN",
+        databaseURL: "YOUR_DATABASE_URL",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_STORAGE_BUCKET",
+        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
     let maxDigits = 7;
     let currentDigits = 2;
     let sequence = [];
@@ -60,7 +84,6 @@
     let totalErrors = 0;
     let name = '';
     let studentId = '';
-    let resultData = JSON.parse(localStorage.getItem("resultData")) || [];
 
     function startTest() {
         name = document.getElementById('nameInput').value;
@@ -118,10 +141,6 @@
         }
     }
 
-    function clearSelection() {
-        userInput = [];
-    }
-
     function checkAnswer() {
         let feedback = document.getElementById('feedback');
         if (userInput.join('') === sequence.join('')) {
@@ -152,16 +171,45 @@
     }
 
     function saveResult() {
-        resultData.push({ name, studentId, score: currentDigits - 1 });
-        localStorage.setItem("resultData", JSON.stringify(resultData));
+        const result = { name, studentId, score: currentDigits - 1 };
+        database.ref("results").push(result);
+        fetchResults();
         document.getElementById('downloadButton').style.display = 'block';
     }
 
+    function fetchResults() {
+        const resultsRef = database.ref("results");
+        resultsRef.once("value", (snapshot) => {
+            let data = snapshot.val();
+            let output = "<h3>Saved Results</h3><ul>";
+            for (let key in data) {
+                output += `<li>${data[key].name} - ${data[key].studentId} - Score: ${data[key].score}</li>`;
+            }
+            output += "</ul>";
+            document.getElementById("resultsContainer").innerHTML = output;
+        });
+    }
+
+    window.onload = fetchResults;
+
     function downloadExcel() {
-        let ws = XLSX.utils.json_to_sheet(resultData);
-        let wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Results");
-        XLSX.writeFile(wb, "digit_span_results.xlsx");
+        const resultsRef = database.ref("results");
+        resultsRef.once("value", (snapshot) => {
+            let data = snapshot.val();
+            let resultArray = [];
+            for (let key in data) {
+                resultArray.push({
+                    Name: data[key].name,
+                    Student_ID: data[key].studentId,
+                    Score: data[key].score
+                });
+            }
+
+            let ws = XLSX.utils.json_to_sheet(resultArray);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Results");
+            XLSX.writeFile(wb, "Digit_Span_Results.xlsx");
+        });
     }
 </script>
 
