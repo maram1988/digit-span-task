@@ -56,8 +56,6 @@
 <div id="digitsContainer"></div>
 <button id="clearButton" onclick="clearSelection()">Clear Selection</button>
 <div id="feedback"></div>
-<button id="downloadButton" style="display:none;" onclick="downloadExcel()">Download Results</button>
-
 <div id="resultsContainer"></div>
 
 <script>
@@ -134,83 +132,35 @@
         }
     }
 
-    function handleDigitClick(digit) {
-        userInput.push(digit);
-        if (userInput.length === currentDigits) {
-            checkAnswer();
-        }
-    }
-
-    function checkAnswer() {
-        let feedback = document.getElementById('feedback');
-        if (userInput.join('') === sequence.join('')) {
-            correctCount++;
-            feedback.textContent = "Correct!";
-            totalErrors = 0;
-            if (correctCount >= 2 && currentDigits < maxDigits) {
-                currentDigits++;
-                correctCount = 0;
-            }
-        } else {
-            totalErrors++;
-            feedback.textContent = `Incorrect! Correct sequence: ${sequence.join('')}`;
-            if (totalErrors >= 2) {
-                feedback.textContent = `Game Over! Score: ${currentDigits - 1}`;
-                saveResult();
-                return;
-            }
-        }
-        setTimeout(() => {
-            if (currentDigits > maxDigits) {
-                feedback.textContent = `Task Complete! Score: ${currentDigits - 1}`;
-                saveResult();
-            } else {
-                showSequence();
-            }
-        }, 2000);
-    }
-
     function saveResult() {
         const result = { name, studentId, score: currentDigits - 1 };
-        database.ref("results").push(result);
-        fetchResults();
-        document.getElementById('downloadButton').style.display = 'block';
+        database.ref("results").push(result).then(() => {
+            saveToFile(result);
+            fetchResults();
+        });
+    }
+
+    function saveToFile(result) {
+        let savedResults = localStorage.getItem("savedResults");
+        savedResults = savedResults ? JSON.parse(savedResults) : [];
+        savedResults.push(result);
+        localStorage.setItem("savedResults", JSON.stringify(savedResults));
     }
 
     function fetchResults() {
-        const resultsRef = database.ref("results");
-        resultsRef.once("value", (snapshot) => {
-            let data = snapshot.val();
+        let savedResults = localStorage.getItem("savedResults");
+        if (savedResults) {
+            savedResults = JSON.parse(savedResults);
             let output = "<h3>Saved Results</h3><ul>";
-            for (let key in data) {
-                output += `<li>${data[key].name} - ${data[key].studentId} - Score: ${data[key].score}</li>`;
-            }
+            savedResults.forEach(result => {
+                output += `<li>${result.name} - ${result.studentId} - Score: ${result.score}</li>`;
+            });
             output += "</ul>";
             document.getElementById("resultsContainer").innerHTML = output;
-        });
+        }
     }
 
     window.onload = fetchResults;
-
-    function downloadExcel() {
-        const resultsRef = database.ref("results");
-        resultsRef.once("value", (snapshot) => {
-            let data = snapshot.val();
-            let resultArray = [];
-            for (let key in data) {
-                resultArray.push({
-                    Name: data[key].name,
-                    Student_ID: data[key].studentId,
-                    Score: data[key].score
-                });
-            }
-
-            let ws = XLSX.utils.json_to_sheet(resultArray);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Results");
-            XLSX.writeFile(wb, "Digit_Span_Results.xlsx");
-        });
-    }
 </script>
 
 </body>
