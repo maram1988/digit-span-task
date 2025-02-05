@@ -16,6 +16,7 @@
         #digitDisplay {
             font-size: 80px;
             margin-bottom: 20px;
+            display: none;
         }
         .digitButton {
             font-size: 40px;
@@ -53,48 +54,29 @@
 </div>
 
 <div id="digitDisplay"></div>
-<div id="digitsContainer"></div>
-<button id="clearButton" onclick="clearSelection()">Clear Selection</button>
+<div id="digitsContainer" style="display: none;"></div>
+<button id="clearButton" onclick="clearSelection()" style="display: none;">Clear Selection</button>
 <div id="feedback"></div>
 <div id="resultsContainer"></div>
 
 <script>
-    // Firebase Configuration - استبدل بالقيم الحقيقية من Firebase
-    const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        databaseURL: "YOUR_DATABASE_URL",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-        appId: "YOUR_APP_ID"
-    };
-
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    let maxDigits = 7;
-    let currentDigits = 2;
-    let sequence = [];
-    let userInput = [];
-    let correctCount = 0;
-    let totalErrors = 0;
-    let name = '';
-    let studentId = '';
-
     document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("startButton").addEventListener("click", startTest);
     });
 
     function startTest() {
-        name = document.getElementById('nameInput').value;
-        studentId = document.getElementById('studentIdInput').value;
+        let name = document.getElementById('nameInput').value.trim();
+        let studentId = document.getElementById('studentIdInput').value.trim();
+        
         if (!name || !studentId) {
             alert("Please enter both your name and student ID.");
             return;
         }
+
         document.getElementById('userInfo').style.display = 'none';
+        document.getElementById('digitDisplay').style.display = 'block';
+        document.getElementById('digitsContainer').style.display = 'block';
+        document.getElementById('clearButton').style.display = 'block';
         showSequence();
     }
 
@@ -104,8 +86,8 @@
 
     function showSequence() {
         document.getElementById('feedback').textContent = '';
-        userInput = [];
-        sequence = generateSequence(currentDigits);
+        let userInput = [];
+        let sequence = generateSequence(3);
         let digitDisplay = document.getElementById('digitDisplay');
         let index = 0;
 
@@ -135,21 +117,6 @@
             container.appendChild(digitButton);
         }
     }
-
-    function fetchResults() {
-        let savedResults = localStorage.getItem("savedResults");
-        if (savedResults) {
-            savedResults = JSON.parse(savedResults);
-            let output = "<h3>Saved Results</h3><ul>";
-            savedResults.forEach(result => {
-                output += `<li>${result.name} - ${result.studentId} - Score: ${result.score}</li>`;
-            });
-            output += "</ul>";
-            document.getElementById("resultsContainer").innerHTML = output;
-        }
-    }
-
-    window.onload = fetchResults;
 </script>
 
 </body>
