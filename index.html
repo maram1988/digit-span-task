@@ -27,7 +27,7 @@
             background-color: yellow;
             border: 2px solid #ccc;
         }
-        #clearButton, #startButton, #downloadButton {
+        #clearButton, #startButton {
             margin-top: 20px;
             font-size: 20px;
         }
@@ -39,6 +39,12 @@
             margin-top: 30px;
             font-size: 20px;
             text-align: left;
+        }
+        #thankYouMessage {
+            margin-top: 20px;
+            font-size: 24px;
+            color: green;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -57,7 +63,7 @@
 <div id="digitsContainer"></div>
 <button id="clearButton" onclick="clearSelection()">Clear Selection</button>
 <div id="feedback"></div>
-<button id="downloadButton" style="display:none;" onclick="downloadExcel()">Send your result</button>
+<div id="thankYouMessage"></div>
 
 <div id="resultsContainer"></div>
 
@@ -175,21 +181,31 @@
             totalErrors++;
             feedback.textContent = `❌ Incorrect! Correct sequence: ${sequence.join('')}`;
             if (totalErrors >= 2) {
-                feedback.textContent = `🚫 Game Over! Score: ${currentDigits - 1}`;
-                document.getElementById('downloadButton').style.display = 'block';
-                saveResultsToFirebase(document.getElementById('nameInput').value.trim(), document.getElementById('studentIdInput').value.trim(), currentDigits - 1);
+                feedback.textContent = `🚫 Game Over! Your score: ${currentDigits - 1}`;
+                endGame(currentDigits - 1);
                 return;
             }
         }
         setTimeout(() => {
             if (currentDigits > maxDigits) {
-                feedback.textContent = `🎉 Task Complete! Score: ${currentDigits - 1}`;
-                document.getElementById('downloadButton').style.display = 'block';
-                saveResultsToFirebase(document.getElementById('nameInput').value.trim(), document.getElementById('studentIdInput').value.trim(), currentDigits - 1);
+                feedback.textContent = `🎉 Task Complete! Your score: ${currentDigits - 1}`;
+                endGame(currentDigits - 1);
             } else {
                 showSequence();
             }
         }, 2000);
+    }
+
+    function endGame(score) {
+        // Save results to Firebase
+        saveResultsToFirebase(document.getElementById('nameInput').value.trim(), document.getElementById('studentIdInput').value.trim(), score);
+
+        // Show the result and thank you message
+        document.getElementById('thankYouMessage').textContent = "Thank you for your effort and good luck!";
+
+        // Hide unnecessary elements
+        document.getElementById('digitsContainer').innerHTML = '';
+        document.getElementById('clearButton').style.display = 'none';
     }
 
     function saveResultsToFirebase(name, studentId, score) {
@@ -201,24 +217,9 @@
             timestamp: new Date().toISOString()
         }).then(() => {
             console.log("Results saved to Firebase!");
-            // Hide the download button and show a thank you message
-            document.getElementById('downloadButton').style.display = 'none';
-            document.getElementById('feedback').textContent = "Thank you for your effort and good luck!";
         }).catch((error) => {
             console.error("Error saving results to Firebase:", error);
         });
-    }
-
-    function downloadExcel() {
-        const results = [
-            ["Name", "Student ID", "Score"],
-            [document.getElementById('nameInput').value.trim(), document.getElementById('studentIdInput').value.trim(), currentDigits - 1]
-        ];
-
-        const ws = XLSX.utils.aoa_to_sheet(results);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Results");
-        XLSX.writeFile(wb, "digit_span_results.xlsx");
     }
 
     function clearSelection() {
