@@ -64,6 +64,7 @@
 <div id="resultsContainer"></div>
 
 <script>
+    // ✅ تأكد من تحميل Firebase ✅
     document.addEventListener("DOMContentLoaded", function () {
         console.log("🚀 الصفحة جاهزة، جاري تحميل Firebase...");
 
@@ -82,6 +83,100 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         console.log("✅ Firebase تم تحميله بنجاح", firebase);
+
+        // ✅ ربط زر Start Test ✅
+        document.getElementById("startButton").addEventListener("click", startTest);
+
+        function startTest() {
+            console.log("✅ Start Test button clicked!");
+            let name = document.getElementById('nameInput').value.trim();
+            let studentId = document.getElementById('studentIdInput').value.trim();
+
+            if (!name || !studentId) {
+                alert("الرجاء إدخال الاسم ومعرف الطالب!");
+                return;
+            }
+
+            if (!/^\d+$/.test(studentId)) {
+                alert("معرف الطالب يجب أن يحتوي على أرقام فقط!");
+                return;
+            }
+
+            document.getElementById('userInfo').style.display = 'none';
+            showSequence();
+        }
+
+        function generateSequence(length) {
+            return Array.from({ length }, () => Math.floor(Math.random() * 10));
+        }
+
+        function showSequence() {
+            document.getElementById('feedback').textContent = '';
+            userInput = [];
+            sequence = generateSequence(currentDigits);
+            let digitDisplay = document.getElementById('digitDisplay');
+            let index = 0;
+
+            function displayNextDigit() {
+                if (index < sequence.length) {
+                    digitDisplay.textContent = sequence[index];
+                    index++;
+                    setTimeout(displayNextDigit, 1000);
+                } else {
+                    setTimeout(() => {
+                        digitDisplay.textContent = '';
+                        showDigitsForSelection();
+                    }, 800);
+                }
+            }
+            displayNextDigit();
+        }
+
+        function showDigitsForSelection() {
+            let container = document.getElementById('digitsContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                let digitButton = document.createElement('button');
+                digitButton.textContent = i;
+                digitButton.className = 'digitButton';
+                digitButton.onclick = () => handleDigitClick(i);
+                container.appendChild(digitButton);
+            }
+        }
+
+        function handleDigitClick(digit) {
+            userInput.push(digit);
+            if (userInput.length === currentDigits) {
+                checkAnswer();
+            }
+        }
+
+        function checkAnswer() {
+            let feedback = document.getElementById('feedback');
+            if (userInput.join('') === sequence.join('')) {
+                correctCount++;
+                feedback.textContent = "✅ Correct!";
+                totalErrors = 0;
+                if (correctCount >= 2 && currentDigits < maxDigits) {
+                    currentDigits++;
+                    correctCount = 0;
+                }
+            } else {
+                totalErrors++;
+                feedback.textContent = `❌ Incorrect! Correct sequence: ${sequence.join('')}`;
+                if (totalErrors >= 2) {
+                    feedback.textContent = `🚫 Game Over! Score: ${currentDigits - 1}`;
+                    return;
+                }
+            }
+            setTimeout(() => {
+                if (currentDigits > maxDigits) {
+                    feedback.textContent = `🎉 Task Complete! Score: ${currentDigits - 1}`;
+                } else {
+                    showSequence();
+                }
+            }, 2000);
+        }
     });
 </script>
 
