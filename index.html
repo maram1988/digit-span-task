@@ -204,6 +204,9 @@
             timestamp: new Date().toISOString()
         }).then(() => {
             console.log("Results saved to Firebase!");
+            // Hide the download button and show a thank you message
+            document.getElementById('downloadButton').style.display = 'none';
+            document.getElementById('feedback').textContent = "Thank you for your effort and good luck!";
         }).catch((error) => {
             console.error("Error saving results to Firebase:", error);
         });
