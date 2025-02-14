@@ -63,10 +63,10 @@
 
 <div id="resultsContainer"></div>
 
-<script>
+<script type="module">
    // استيراد Firebase باستخدام ES6 Modules
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
+ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+ import { getDatabase } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
 // ✅ تكوين Firebase ✅
 const firebaseConfig = {
@@ -77,10 +77,12 @@ const firebaseConfig = {
     storageBucket: "digit-span-task.firebasestorage.app",
     messagingSenderId: "157413435752",
     appId: "1:157413435752:web:0af83e2f3027c235b74edd"
-};
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
 
 // ✅ تهيئة Firebase ✅
-const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 
