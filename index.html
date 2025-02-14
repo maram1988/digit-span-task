@@ -7,9 +7,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
    <!-- ✅ تحميل Firebase من CDN ✅ -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -78,8 +77,8 @@
         appId: "1:157413435752:web:0af83e2f3027c235b74edd"
     };
 
-    // ✅ تهيئة Firebase ✅
-    firebase.initializeApp(firebaseConfig);
+   // ✅ تهيئة Firebase ✅
+    const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
     console.log("✅ Firebase تم تحميله بنجاح:", firebase);
