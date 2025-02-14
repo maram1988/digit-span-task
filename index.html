@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digit Span Task</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    <!-- Include Firebase scripts only once -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+   <!-- ✅ تحميل Firebase من CDN ✅ -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
@@ -27,7 +30,7 @@
             background-color: yellow;
             border: 2px solid #ccc;
         }
-        #clearButton, #startButton, #downloadButton, #restartButton {
+        #clearButton, #startButton, #downloadButton {
             margin-top: 20px;
             font-size: 20px;
         }
@@ -57,35 +60,31 @@
 <div id="digitsContainer"></div>
 <button id="clearButton" onclick="clearSelection()">Clear Selection</button>
 <div id="feedback"></div>
-<button id="downloadButton" style="display:none;" onclick="downloadExcel()">Send your result</button>
-<button id="restartButton" style="display:none;" onclick="restartGame()">Restart</button>
+<button id="downloadButton" style="display:none;" onclick="downloadExcel()">Sent your result</button>
 
 <div id="resultsContainer"></div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        console.log("🚀 الصفحة جاهزة، جاري تحميل Firebase...");
+<script type="module">
+     // Your JavaScript code here
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("🚀 الصفحة جاهزة، جاري تحميل Firebase...");
+           
+            // Firebase configuration and initialization
+            const firebaseConfig = {
+                apiKey: "AIzaSyBJsuHITYRAJBZd0Z7j8ankSrauS7Dl3Vo",
+                authDomain: "digit-span-task.firebaseapp.com",
+                databaseURL: "https://digit-span-task-default-rtdb.europe-west1.firebasedatabase.app",
+                projectId: "digit-span-task",
+                storageBucket: "digit-span-task.firebasestorage.app",
+                messagingSenderId: "157413435752",
+                appId: "1:157413435752:web:0af83e2f3027c235b74edd"
+            };
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBJsuHITYRAJBZd0Z7j8ankSrauS7Dl3Vo",
-            authDomain: "digit-span-task.firebaseapp.com",
-            databaseURL: "https://digit-span-task-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "digit-span-task",
-            storageBucket: "digit-span-task.firebasestorage.app",
-            messagingSenderId: "157413435752",
-            appId: "1:157413435752:web:0af83e2f3027c235b74edd"
-        };
-
-        // Initialize Firebase only if it hasn't been initialized already
-        if (!firebase.apps.length) {
             const app = firebase.initializeApp(firebaseConfig);
             const database = firebase.database();
-            console.log("✅ Firebase تم تحميله بنجاح:", app);
-        }
 
-        // Rest of your code...
-    });
+            console.log("✅ Firebase تم تحميله بنجاح:", firebase);
+
 
     // ✅ تعريف المتغيرات الأساسية ✅
     let maxDigits = 7;
@@ -178,7 +177,6 @@
             if (totalErrors >= 2) {
                 feedback.textContent = `🚫 Game Over! Score: ${currentDigits - 1}`;
                 document.getElementById('downloadButton').style.display = 'block';
-                document.getElementById('restartButton').style.display = 'block';
                 saveResultsToFirebase(document.getElementById('nameInput').value.trim(), document.getElementById('studentIdInput').value.trim(), currentDigits - 1);
                 return;
             }
@@ -187,7 +185,6 @@
             if (currentDigits > maxDigits) {
                 feedback.textContent = `🎉 Task Complete! Score: ${currentDigits - 1}`;
                 document.getElementById('downloadButton').style.display = 'block';
-                document.getElementById('restartButton').style.display = 'block';
                 saveResultsToFirebase(document.getElementById('nameInput').value.trim(), document.getElementById('studentIdInput').value.trim(), currentDigits - 1);
             } else {
                 showSequence();
@@ -204,9 +201,6 @@
             timestamp: new Date().toISOString()
         }).then(() => {
             console.log("Results saved to Firebase!");
-            // Hide the download button and show a thank you message
-            document.getElementById('downloadButton').style.display = 'none';
-            document.getElementById('feedback').textContent = "Thank you for your effort and good luck!";
         }).catch((error) => {
             console.error("Error saving results to Firebase:", error);
         });
@@ -223,22 +217,7 @@
         XLSX.utils.book_append_sheet(wb, ws, "Results");
         XLSX.writeFile(wb, "digit_span_results.xlsx");
     }
-
-    function clearSelection() {
-        userInput = [];
-        document.getElementById('digitsContainer').innerHTML = '';
-        document.getElementById('feedback').textContent = '';
-    }
-
-    function restartGame() {
-        currentDigits = 2;
-        correctCount = 0;
-        totalErrors = 0;
-        document.getElementById('downloadButton').style.display = 'none';
-        document.getElementById('restartButton').style.display = 'none';
-        document.getElementById('feedback').textContent = '';
-        startTest();
-    }
+});
 </script>
 
 </body>
