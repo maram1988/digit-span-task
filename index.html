@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digit Span Task</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -58,11 +60,7 @@
 
 <div id="resultsContainer"></div>
 
-<script type="module">
-    // استيراد Firebase بطريقة صحيحة
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
-
+<script>
     // تكوين Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyBJsuHITYRAJBZd0Z7j8ankSrauS7Dl3Vo",
@@ -75,8 +73,8 @@
     };
 
     // تهيئة Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
 
     let maxDigits = 7;
     let currentDigits = 2;
