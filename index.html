@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digit Span Task</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -49,7 +47,7 @@
     <p>Please enter your name and student ID:</p>
     <input type="text" id="nameInput" placeholder="Enter your name" /><br><br>
     <input type="text" id="studentIdInput" placeholder="Enter your student ID" /><br><br>
-    <button id="startButton" onclick="startTest()">Start Test</button>
+    <button id="startButton">Start Test</button>
 </div>
 
 <div id="digitDisplay"></div>
@@ -58,28 +56,27 @@
 <div id="feedback"></div>
 <button id="downloadButton" style="display:none;" onclick="downloadExcel()">Download Results</button>
 
-<div id="resultsContainer"></div> 
-    
-    
+<div id="resultsContainer"></div>
+
 <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+    // استيراد Firebase بطريقة صحيحة
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-database.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBJsuHITYRAJBZd0Z7j8ankSrauS7Dl3Vo",
-    authDomain: "digit-span-task.firebaseapp.com",
-    databaseURL: "https://digit-span-task-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "digit-span-task",
-    storageBucket: "digit-span-task.firebasestorage.app",
-    messagingSenderId: "157413435752",
-    appId: "1:157413435752:web:1e3cc6dc017010afb74edd"
-  };
+    // تكوين Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyBJsuHITYRAJBZd0Z7j8ankSrauS7Dl3Vo",
+        authDomain: "digit-span-task.firebaseapp.com",
+        databaseURL: "https://digit-span-task-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "digit-span-task",
+        storageBucket: "digit-span-task.firebasestorage.app",
+        messagingSenderId: "157413435752",
+        appId: "1:157413435752:web:1e3cc6dc017010afb74edd"
+    };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
+    // تهيئة Firebase
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
 
     let maxDigits = 7;
     let currentDigits = 2;
@@ -90,7 +87,11 @@
     let name = '';
     let studentId = '';
 
+    // ربط الزر بالدالة
+    document.getElementById("startButton").addEventListener("click", startTest);
+
     function startTest() {
+        console.log("Start Test button clicked!");
         name = document.getElementById('nameInput').value.trim();
         studentId = document.getElementById('studentIdInput').value.trim();
 
@@ -132,62 +133,6 @@
             }
         }
         displayNextDigit();
-    }
-
-    function showDigitsForSelection() {
-        let container = document.getElementById('digitsContainer');
-        container.innerHTML = '';
-        for (let i = 0; i < 10; i++) {
-            let digitButton = document.createElement('button');
-            digitButton.textContent = i;
-            digitButton.className = 'digitButton';
-            digitButton.onclick = () => handleDigitClick(i);
-            container.appendChild(digitButton);
-        }
-    }
-
-    function handleDigitClick(digit) {
-        userInput.push(digit);
-        if (userInput.length === currentDigits) {
-            checkAnswer();
-        }
-    }
-
-    function checkAnswer() {
-        let feedback = document.getElementById('feedback');
-        if (userInput.join('') === sequence.join('')) {
-            correctCount++;
-            feedback.textContent = "Correct!";
-            totalErrors = 0;
-            if (correctCount >= 2 && currentDigits < maxDigits) {
-                currentDigits++;
-                correctCount = 0;
-            }
-        } else {
-            totalErrors++;
-            feedback.innerHTML = `Incorrect! Correct sequence: ${sequence.join('')} <br><button onclick="restartTest()">Try Again</button>`;
-            saveResult();
-            return;
-        }
-        setTimeout(() => {
-            if (currentDigits > maxDigits) {
-                feedback.textContent = `Task Complete! Score: ${currentDigits - 1}`;
-                saveResult();
-            } else {
-                showSequence();
-            }
-        }, 2000);
-    }
-
-    function restartTest() {
-        currentDigits = 2;
-        correctCount = 0;
-        totalErrors = 0;
-        document.getElementById('userInfo').style.display = 'block';
-        document.getElementById('digitsContainer').innerHTML = '';
-        document.getElementById('digitDisplay').textContent = '';
-        document.getElementById('feedback').textContent = '';
-        document.getElementById('resultsContainer').innerHTML = '';
     }
 </script>
 
