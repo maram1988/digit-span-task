@@ -211,6 +211,12 @@
             XLSX.writeFile(wb, "Digit_Span_Results.xlsx");
         });
     }
+
+    function clearSelection() {
+        userInput = [];
+        document.getElementById('feedback').textContent = '';
+        showDigitsForSelection();
+    }
 </script>
 
 </body>
