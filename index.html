@@ -132,6 +132,52 @@
         }
         displayNextDigit();
     }
+
+    function showDigitsForSelection() {
+        let container = document.getElementById('digitsContainer');
+        container.innerHTML = '';
+        for (let i = 0; i < 10; i++) {
+            let digitButton = document.createElement('button');
+            digitButton.textContent = i;
+            digitButton.className = 'digitButton';
+            digitButton.onclick = () => handleDigitClick(i);
+            container.appendChild(digitButton);
+        }
+    }
+
+    function handleDigitClick(digit) {
+        userInput.push(digit);
+        if (userInput.length === currentDigits) {
+            checkAnswer();
+        }
+    }
+
+    function checkAnswer() {
+        let feedback = document.getElementById('feedback');
+        if (userInput.join('') === sequence.join('')) {
+            correctCount++;
+            feedback.textContent = "Correct!";
+            totalErrors = 0;
+            if (correctCount >= 2 && currentDigits < maxDigits) {
+                currentDigits++;
+                correctCount = 0;
+            }
+        } else {
+            totalErrors++;
+            feedback.textContent = `Incorrect! Correct sequence: ${sequence.join('')}`;
+            if (totalErrors >= 2) {
+                feedback.textContent = `Game Over! Score: ${currentDigits - 1}`;
+                return;
+            }
+        }
+        setTimeout(() => {
+            if (currentDigits > maxDigits) {
+                feedback.textContent = `Task Complete! Score: ${currentDigits - 1}`;
+            } else {
+                showSequence();
+            }
+        }, 2000);
+    }
 </script>
 
 </body>
