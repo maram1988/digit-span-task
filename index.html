@@ -61,7 +61,6 @@
 <div id="resultsContainer"></div>
 
 <script>
-    // Firebase Configuration - استبدل بالقيم الحقيقية من Firebase
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
         authDomain: "YOUR_AUTH_DOMAIN",
@@ -71,8 +70,7 @@
         messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
         appId: "YOUR_APP_ID"
     };
-
-    // Initialize Firebase
+    
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
@@ -86,19 +84,25 @@
     let studentId = '';
 
     function startTest() {
-        console.log("Start Test button clicked!"); // تحقق من تنفيذ الدالة
-        name = document.getElementById('nameInput').value;
-        studentId = document.getElementById('studentIdInput').value;
+        name = document.getElementById('nameInput').value.trim();
+        studentId = document.getElementById('studentIdInput').value.trim();
+
         if (!name || !studentId) {
-            alert("Please enter both your name and student ID.");
+            alert("الرجاء إدخال الاسم ومعرف الطالب!");
             return;
         }
+
+        if (!/^\d+$/.test(studentId)) {
+            alert("معرف الطالب يجب أن يحتوي على أرقام فقط!");
+            return;
+        }
+
         document.getElementById('userInfo').style.display = 'none';
         showSequence();
     }
 
     function generateSequence(length) {
-        return Array.from({length}, () => Math.floor(Math.random() * 10));
+        return Array.from({ length }, () => Math.floor(Math.random() * 10));
     }
 
     function showSequence() {
@@ -117,7 +121,7 @@
                 setTimeout(() => {
                     digitDisplay.textContent = '';
                     showDigitsForSelection();
-                }, 1000);
+                }, 800);
             }
         }
         displayNextDigit();
@@ -154,12 +158,9 @@
             }
         } else {
             totalErrors++;
-            feedback.textContent = `Incorrect! Correct sequence: ${sequence.join('')}`;
-            if (totalErrors >= 2) {
-                feedback.textContent = `Game Over! Score: ${currentDigits - 1}`;
-                saveResult();
-                return;
-            }
+            feedback.innerHTML = `Incorrect! Correct sequence: ${sequence.join('')} <br><button onclick="restartTest()">Try Again</button>`;
+            saveResult();
+            return;
         }
         setTimeout(() => {
             if (currentDigits > maxDigits) {
@@ -171,52 +172,15 @@
         }, 2000);
     }
 
-    function saveResult() {
-        const result = { name, studentId, score: currentDigits - 1 };
-        database.ref("results").push(result);
-        fetchResults();
-        document.getElementById('downloadButton').style.display = 'block';
-    }
-
-    function fetchResults() {
-        const resultsRef = database.ref("results");
-        resultsRef.once("value", (snapshot) => {
-            let data = snapshot.val();
-            let output = "<h3>Saved Results</h3><ul>";
-            for (let key in data) {
-                output += `<li>${data[key].name} - ${data[key].studentId} - Score: ${data[key].score}</li>`;
-            }
-            output += "</ul>";
-            document.getElementById("resultsContainer").innerHTML = output;
-        });
-    }
-
-    window.onload = fetchResults;
-
-    function downloadExcel() {
-        const resultsRef = database.ref("results");
-        resultsRef.once("value", (snapshot) => {
-            let data = snapshot.val();
-            let resultArray = [];
-            for (let key in data) {
-                resultArray.push({
-                    Name: data[key].name,
-                    Student_ID: data[key].studentId,
-                    Score: data[key].score
-                });
-            }
-
-            let ws = XLSX.utils.json_to_sheet(resultArray);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Results");
-            XLSX.writeFile(wb, "Digit_Span_Results.xlsx");
-        });
-    }
-
-    function clearSelection() {
-        userInput = [];
+    function restartTest() {
+        currentDigits = 2;
+        correctCount = 0;
+        totalErrors = 0;
+        document.getElementById('userInfo').style.display = 'block';
+        document.getElementById('digitsContainer').innerHTML = '';
+        document.getElementById('digitDisplay').textContent = '';
         document.getElementById('feedback').textContent = '';
-        showDigitsForSelection();
+        document.getElementById('resultsContainer').innerHTML = '';
     }
 </script>
 
