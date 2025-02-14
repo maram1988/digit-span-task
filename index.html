@@ -6,38 +6,9 @@
     <title>Digit Span Task</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
-  <!-- ✅ تحميل Firebase من CDN ✅ -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script> <!-- إذا كنت تحتاج المصادقة -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script> <!-- إذا كنت تحتاج Firestore -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script> <!-- إذا كنت تحتاج التخزين -->
-
-<script>
-    // ✅ تأكد من تحميل Firebase ✅
-    document.addEventListener("DOMContentLoaded", function () {
-        console.log("🚀 الصفحة جاهزة، جاري تحميل Firebase...");
-
-        // ✅ تكوين Firebase ✅
-        const firebaseConfig = {
-            apiKey: "AIzaSyBJsuHITYRAJBZd0Z7j8ankSrauS7Dl3Vo",
-            authDomain: "digit-span-task.firebaseapp.com",
-            databaseURL: "https://digit-span-task-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "digit-span-task",
-            storageBucket: "digit-span-task.firebasestorage.app",
-            messagingSenderId: "157413435752",
-            appId: "1:157413435752:web:0af83e2f3027c235b74edd"
-        };
-
-        // ✅ تهيئة Firebase ✅
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        console.log("✅ Firebase تم تحميله بنجاح:", firebase);
-    });
-</script>
-
-
+    <!-- ✅ تحميل Firebase من CDN ✅ -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
     <style>
         body {
@@ -93,7 +64,34 @@
 <div id="resultsContainer"></div>
 
 <script>
-   
+    // ✅ تأكد من تحميل Firebase ✅
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("🚀 الصفحة جاهزة، جاري تحميل Firebase...");
+
+        // ✅ تكوين Firebase ✅
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJsuHITYRAJBZd0Z7j8ankSrauS7Dl3Vo",
+            authDomain: "digit-span-task.firebaseapp.com",
+            databaseURL: "https://digit-span-task-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "digit-span-task",
+            storageBucket: "digit-span-task.firebasestorage.app",
+            messagingSenderId: "157413435752",
+            appId: "1:157413435752:web:0af83e2f3027c235b74edd"
+        };
+
+        // ✅ تهيئة Firebase ✅
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        console.log("✅ Firebase تم تحميله بنجاح:", firebase);
+
+        // ✅ تعريف المتغيرات الأساسية ✅
+        let maxDigits = 7;
+        let currentDigits = 2;
+        let sequence = [];
+        let userInput = [];
+        let correctCount = 0;
+        let totalErrors = 0;
+
         // ✅ ربط زر Start Test ✅
         document.getElementById("startButton").addEventListener("click", startTest);
 
