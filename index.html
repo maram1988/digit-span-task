@@ -63,23 +63,26 @@
 
 <div id="resultsContainer"></div>
 
-<script type="module" src="firebase-database.js">
->
-    // ✅ تكوين Firebase ✅
-    import { initializeApp } from "firebase/app";
-    const firebaseConfig = {
-        apiKey: "AIzaSyBJsuHITYRAJBZd0Z7j8ankSrauS7Dl3Vo",
-        authDomain: "digit-span-task.firebaseapp.com",
-        databaseURL: "https://digit-span-task-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "digit-span-task",
-        storageBucket: "digit-span-task.firebasestorage.app",
-        messagingSenderId: "157413435752",
-        appId: "1:157413435752:web:1e3cc6dc017010afb74edd"
-    };
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-    // ✅ تهيئة Firebase ✅
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBJsuHITYRAJBZd0Z7j8ankSrauS7Dl3Vo",
+    authDomain: "digit-span-task.firebaseapp.com",
+    databaseURL: "https://digit-span-task-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "digit-span-task",
+    storageBucket: "digit-span-task.firebasestorage.app",
+    messagingSenderId: "157413435752",
+    appId: "1:157413435752:web:0af83e2f3027c235b74edd"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+
 
     let maxDigits = 7;
     let currentDigits = 2;
