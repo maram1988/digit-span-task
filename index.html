@@ -64,7 +64,6 @@
 <div id="resultsContainer"></div>
 
 <script>
-    // ✅ تأكد من تحميل Firebase ✅
     document.addEventListener("DOMContentLoaded", function () {
         console.log("🚀 الصفحة جاهزة، جاري تحميل Firebase...");
 
@@ -82,6 +81,7 @@
         // ✅ تهيئة Firebase ✅
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+
         console.log("✅ Firebase تم تحميله بنجاح:", firebase);
 
         // ✅ تعريف المتغيرات الأساسية ✅
